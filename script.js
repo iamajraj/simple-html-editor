@@ -2,11 +2,44 @@ const inp = document.querySelector("input");
 const editor = document.querySelector(".editor");
 const iframe = document.querySelector("iframe");
 
-inp.addEventListener("keypress", addLine);
+inp.addEventListener("keydown", (e) => {
+    addLine(e);
+    goDownward(e);
+});
 
 let totalLine = 1;
 
-function showCode() {
+window.onload = () => {
+    inp.value = "<h1>Hello, world!</h1>";
+    renderCode();
+};
+
+function createInput() {
+    const div = document.createElement("div");
+    const span = document.createElement("span");
+    const newInp = document.createElement("input");
+
+    div.classList.add("line-container");
+    span.textContent = totalLine;
+
+    newInp.classList.add("editor-line");
+    newInp.addEventListener("keydown", (e) => {
+        addLine(e);
+        deleteLine(e);
+        goUpward(e);
+        goDownward(e);
+    });
+    newInp.focus();
+
+    div.append(span);
+    div.append(newInp);
+
+    return {
+        div,
+        newInp,
+    };
+}
+function renderCode() {
     const letAllInps = document.querySelectorAll(".editor-line");
     let code = "";
     letAllInps.forEach((e) => {
@@ -28,37 +61,24 @@ function addLine(e) {
 
 function goUpward(e) {
     if (e.key === "ArrowUp") {
-        e.target.previousElementSibling.focus();
+        e.target.parentElement.previousElementSibling.lastElementChild.focus();
+    }
+}
+function goDownward(e) {
+    if (e.key === "ArrowDown") {
+        let el = e.target.parentElement.nextElementSibling;
+        if (el) {
+            el.lastElementChild.focus();
+        }
     }
 }
 
 function deleteLine(e) {
     if (e.key === "Backspace") {
         if (e.target.value === "") {
-            let lines = document.querySelectorAll(".editor-line");
-            lines[lines.length - 2].focus();
+            totalLine--;
+            e.target.parentElement.previousElementSibling.lastElementChild.focus();
             editor.removeChild(e.target.parentElement);
         }
     }
-}
-
-function createInput() {
-    const div = document.createElement("div");
-    div.classList.add("line-container");
-    const span = document.createElement("span");
-    span.textContent = totalLine;
-    const newInp = document.createElement("input");
-    newInp.classList.add("editor-line");
-    newInp.addEventListener("keypress", addLine);
-    newInp.addEventListener("keydown", deleteLine);
-    newInp.addEventListener("keydown", goUpward);
-    newInp.focus();
-
-    div.append(span);
-    div.append(newInp);
-
-    return {
-        div,
-        newInp,
-    };
 }
